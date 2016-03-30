@@ -14,7 +14,8 @@ $(document).ready(function(){
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(loginInfo),
       success: function(response) {
-        alert("SUCCESS");
+        var jsonResponse = response.responseJSON;
+        console.log(response.user_id)
       },
       error: function(response) {
         var jsonResponse = response.responseJSON;

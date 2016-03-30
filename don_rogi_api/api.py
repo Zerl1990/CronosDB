@@ -69,11 +69,10 @@ def user_login():
       raise ValueError("Cannot parse request: {0}".format(error))
     if data is None:
       raise ValueError("Request is None")
-    user_id = db.login_user(data["name"], data["password"])
-    if not user_id:
+    user = db.login_user(data["name"], data["password"])
+    if not user:
       raise ValueError("Wrong name or password")
-    else:
-    return json.dumps({"user_id": user_id})
+    return json.dumps(user)
   except ValueError as error:
     msg =  "Exception...{0}".format(error)
     response.status = 400

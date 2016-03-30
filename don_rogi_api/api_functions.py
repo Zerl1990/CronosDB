@@ -83,7 +83,7 @@ class CronosDB():
     elif len(result) == 0:
       raise ValueError ("Wrong name or password ({0})".format(name))
     elif result[0]['name'] == name and result[0]['password'] == password:
-      return result[0]['id']
+      return result[0]
 
   def update_user_password(self, user_id, password=None):
     query = "UPDATE user SET password='{0}' WHERE id='{1}'"
