@@ -402,6 +402,7 @@ CREATE TABLE `user` (
   `name` varchar(64) NOT NULL,
   `password` varchar(64) NOT NULL,
   `email` varchar(64) NOT NULL,
+  `admin` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -412,7 +413,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'LuisRivas','LuisRivas','luis.rivas.0606@gmail.com'),(2,'TestUser','qwerty12','qwerty12'),(3,'LuisRivas2','2','1');
+INSERT INTO `user` VALUES (1,'LuisRivas','LuisRivas','luis.rivas.0606@gmail.com',0),(2,'TestUser','qwerty12','qwerty12',0),(3,'LuisRivas2','2','1',0);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -450,4 +451,4 @@ USE `cronos`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-03-29 20:23:29
+-- Dump completed on 2016-03-29 20:38:49

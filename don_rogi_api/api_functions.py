@@ -81,10 +81,9 @@ class CronosDB():
     if len(result) > 1:
       raise ValueError("Cannot login, we have a cloned user {0}!".format(name))
     elif len(result) == 0:
-      print "Wrong name or password ({0})".format(name)
-      return False
+      raise ValueError ("Wrong name or password ({0})".format(name))
     elif result[0]['name'] == name and result[0]['password'] == password:
-      return True
+      return result[0]['id']
 
   def update_user_password(self, user_id, password=None):
     query = "UPDATE user SET password='{0}' WHERE id='{1}'"
