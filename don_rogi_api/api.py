@@ -90,13 +90,9 @@ def update_user(user_id):
       raise ValueError("Cannot parse request: {0}".format(error))
     if data is None:
       raise ValueError("Request is None")
-    if "email" in data:
-      if not db.update_user_email(user_id, data["email"]):
-        raise ValueError("Cannot update user email, it does not exists")
-    if "password" in data:
-      if not db.update_user_password(user_id, data["password"]):
-        raise ValueError("Cannot update user email, it does not exists")
-    return json.dumps(db.get_user_by_id(user_id))
+    if not db.update_user(user_id, data["name"], data["password"], data["email"], data["admin"]):
+      raise ValueError("Cannot update user {0}".format(user_id))
+    return json.dumps(db.get_user_by_id(user_id)[0])
   except ValueError as error:
     msg =  "Exception...{0}".format(error)
     response.status = 400

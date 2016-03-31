@@ -15,8 +15,7 @@ class CronosDB():
       cursor.execute(query)
       result = [dict(line) for line in [zip([ column[0] for column in cursor.description ], row) for row in cursor.fetchall()]]
     except mdb.Error as error:
-      print "Error: {0}".format(error)
-      return None
+      raise ValueError("Error: {0}".format(error))
     finally:
       connection.close()
       return result
@@ -28,8 +27,7 @@ class CronosDB():
       cursor.execute(query)
       connection.commit()
     except mdb.Error as error:
-      print "Error: {0}".format(error)
-      return False
+      raise ValueError("Error: {0}".format(error))
     finally:
       connection.close()
       return True
@@ -41,8 +39,7 @@ class CronosDB():
       cursor.execute(query)
       connection.commit()
     except mdb.Error as error:
-      print "Error: {0}".format(error)
-      return False
+      raise ValueError("Error: {0}".format(error))
     finally:
       connection.close()
       return True
@@ -54,8 +51,7 @@ class CronosDB():
       cursor.execute(query)
       connection.commit()
     except mdb.Error as error:
-      print "Error: {0}".format(error)
-      return False
+      raise ValueError("Error: {0}".format(error))
     finally:
       connection.close()
       return True
@@ -64,14 +60,13 @@ class CronosDB():
   #                       USER SECTION                                         #
   ##############################################################################
   def add_user(self, name=None, password=None, email=None):
-    user_id = self.get_user_id(name, password)
+    user_id = self.get_user_id(name)
     if user_id:
-      print "Cannot add user, {0} already exists".format(name)
-      return user_id
+      raise ValueError("Cannot add user, {0} already exists".format(name))
     query = "INSERT INTO user (id, name, password, email) VALUES (DEFAULT, '{0}', '{1}', '{2}')"
     query = query.format(name, password, email)
     self.insert(query)
-    user_id = self.get_user_id(name, password)
+    user_id = self.get_user_id(name)
     return user_id
 
   def login_user(self, name, password):
@@ -85,19 +80,14 @@ class CronosDB():
     elif result[0]['name'] == name and result[0]['password'] == password:
       return result[0]
 
-  def update_user_password(self, user_id, password=None):
-    query = "UPDATE user SET password='{0}' WHERE id='{1}'"
-    query = query.format(password, user_id)
+  def update_user(self, user_id=None, name=None, password=None, email=None, admin=None):
+    query = "UPDATE user SET name='{0}', password='{1}', email='{2}', admin='{3}' WHERE id='{4}'"
+    query = query.format(name, password, email, admin, user_id);
     return self.update(query)
 
-  def update_user_email(self, user_id=None, email=None):
-    query = "UPDATE user SET email='{0}' WHERE id='{1}'"
-    query = query.format(email, user_id)
-    return self.update(query)
-
-  def get_user_id(self, name, password):
-    query = "SELECT id FROM user WHERE name='{0}' AND password='{1}'"
-    query = query.format(name, password)
+  def get_user_id(self, name):
+    query = "SELECT id FROM user WHERE name='{0}'"
+    query = query.format(name)
     result = self.select(query)
     if len(result) < 1:
       return None
