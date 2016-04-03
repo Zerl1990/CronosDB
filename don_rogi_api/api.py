@@ -102,19 +102,19 @@ def update_user(user_id):
 ################################################################################
 #     ACTOR METHODS
 ################################################################################
-@get('/actors')
+@route('/actors', method=['OPTIONS', 'GET'])
 def show_actors():
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_actors())
 
-@get('/actors/<actor_id>')
+@route('/actors/<actor_id>', method=['OPTIONS', 'GET'])
 def show_actor_by_id(actor_id):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_actor_by_id(actor_id))
 
-@post('/actors')
+@route('/actors', method=['OPTIONS', 'POST'])
 def add_actor():
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -133,7 +133,7 @@ def add_actor():
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@put('/actors/<actor_id>')
+@route('/actors/<actor_id>', method=['OPTIONS', 'PUT'])
 def update_actor(actor_id):
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -156,19 +156,19 @@ def update_actor(actor_id):
 ################################################################################
 #     DIRECTOR METHODS
 ################################################################################
-@get('/directors')
+@route('/directors', method=['OPTIONS', 'GET'])
 def show_directors():
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_directors())
 
-@get('/directors/<director_id>')
+@route('/directors/<director_id>', method=['OPTIONS', 'GET'])
 def show_director_by_id(director_id):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_director_by_id(director_id))
 
-@post('/directors')
+@route('/directors', method=['OPTIONS', 'POST'])
 def add_actor():
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -187,7 +187,7 @@ def add_actor():
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@put('/directors/<director_id>')
+@route('/directors/<director_id>', method=['OPTIONS', 'PUT'])
 def update_actor(director_id):
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -210,19 +210,19 @@ def update_actor(director_id):
 ################################################################################
 #     GENRE METHODS
 ################################################################################
-@get('/genres')
+@route('/genres', method=['OPTIONS', 'GET'])
 def show_genres():
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_genres())
 
-@get('/genres/<genre_id>')
+@route('/genres/<genre_id>', method=['OPTIONS', 'GET'])
 def show_director_by_id(genre_id):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_genre_by_id(genre_id))
 
-@post('/genres')
+@route('/genres', method=['OPTIONS', 'POST'])
 def add_actor():
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -233,7 +233,7 @@ def add_actor():
       raise ValueError("Cannot parse request: {0}".format(error))
     if data is None:
       raise ValueError("Request is None")
-    genre_id = db.add_genre(data["genre"], data["subgenre"])
+    genre_id = db.add_genre(data["genre"], data["sub_genre"])
     return json.dumps({'genre_id': genre_id})
   except ValueError as error:
     msg =  "Exception...{0}".format(error)
@@ -241,7 +241,7 @@ def add_actor():
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@put('/genres/<genre_id>')
+@route('/genres/<genre_id>', method=['OPTIONS', 'PUT'])
 def update_actor(genre_id):
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -252,7 +252,7 @@ def update_actor(genre_id):
       raise ValueError("Cannot parse request: {0}".format(error))
     if data is None:
       raise ValueError("Request is None")
-    if not db.update_genre(genre_id, data["genre"], data["subgenre"]):
+    if not db.update_genre(genre_id, data["genre"], data["sub_genre"]):
       raise ValueError("Cannot update genre{0}-{1}".format(genre_id, data["genre"]))
     return json.dumps(db.get_genre_by_id(genre_id))
   except ValueError as error:
@@ -264,19 +264,19 @@ def update_actor(genre_id):
 ################################################################################
 #     FILM STUDIO SECTION
 ################################################################################
-@get('/studios')
+@route('/studios', method=['OPTIONS', 'GET'])
 def show_studios():
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_studios())
 
-@get('/studios/<studio_id>')
+@route('/studios/<studio_id>', method=['OPTIONS', 'GET'])
 def show_studio_by_id(studio_id):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_studio_by_id(studio_id))
 
-@post('/studios')
+@route('/studios', method=['OPTIONS', 'POST'])
 def add_studio():
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -295,7 +295,7 @@ def add_studio():
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@put('/studios/<studio_id>')
+@route('/studios/<studio_id>', method=['OPTIONS', 'PUT'])
 def update_actor(studio_id):
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -318,19 +318,19 @@ def update_actor(studio_id):
 ################################################################################
 #     AWARD SECTION
 ################################################################################
-@get('/awards')
+@route('/awards', method=['OPTIONS', 'GET'])
 def show_awards():
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_awards())
 
-@get('/awards/<award_id>')
+@route('/awards/<award_id>', method=['OPTIONS', 'GET'])
 def show_studio_by_id(award_id):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_award_by_id(award_id))
 
-@post('/awards')
+@route('/awards', method=['OPTIONS', 'POST'])
 def add_studio():
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -349,7 +349,7 @@ def add_studio():
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@put('/awards/<award_id>')
+@route('/awards/<award_id>', method=['OPTIONS', 'PUT'])
 def update_award(award_id):
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -369,19 +369,19 @@ def update_award(award_id):
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@get('/awards/<award_id>/categories')
+@route('/awards/<award_id>/categories', method=['OPTIONS', 'GET'])
 def show_award_categories(award_id):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_award_categories(award_id))
 
-@get('/awards/<award_id>/categories/<category_id>')
+@route('/awards/<award_id>/categories/<category_id>', method=['OPTIONS', 'GET'])
 def show_award_category_by_id(award_id, category_id):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_award_category_by_id(award_id, category_id))
 
-@post('/awards/<award_id>/categories')
+@route('/awards/<award_id>/categories', method=['OPTIONS', 'POST'])
 def add_award_category(award_id):
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -400,7 +400,7 @@ def add_award_category(award_id):
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@put('/awards/<award_id>/categories/<category_id>')
+@route('/awards/<award_id>/categories/<category_id>', method=['OPTIONS', 'PUT'])
 def update_award_category(award_id, category_id):
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -420,25 +420,25 @@ def update_award_category(award_id, category_id):
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@get('/awards/<award_id>/nominations')
+@route('/awards/<award_id>/nominations', method=['OPTIONS', 'GET'])
 def show_award_nominations(award_id):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_award_nominations(award_id))
 
-@get('/awards/<award_id>/nominations/<year>')
+@route('/awards/<award_id>/nominations/<year>', method=['OPTIONS', 'GET'])
 def show_award_nominations_by_year(award_id, year):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_award_nominations_by_year(award_id, year))
 
-@get('/awards/<award_id>/nominations/<year>/<category_id>')
+@route('/awards/<award_id>/nominations/<year>/<category_id>', method=['OPTIONS', 'GET'])
 def show_award_nominations_by_year_category(award_id, year, category_id):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_award_nominations_by_year_category(award_id, year, category_id))
 
-@post('/awards/<award_id>/nominations')
+@route('/awards/<award_id>/nominations', method=['OPTIONS', 'POST'])
 def add_award_category(award_id):
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -457,7 +457,7 @@ def add_award_category(award_id):
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@put('/awards/<award_id>/nominations/<nom_id>')
+@route('/awards/<award_id>/nominations/<nom_id>', method=['OPTIONS', 'PUT'])
 def update_award_category(award_id, nom_id):
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -476,6 +476,12 @@ def update_award_category(award_id, nom_id):
     response.status = 400
     print msg
     return json.dumps({"status": 400, "msg": msg})
+
+@route('/nominations_categories', method=['OPTIONS', 'GET'])
+def show_awards():
+  db = CronosDB("root", "zerl", "cronos")
+  response.headers['Content-Type'] = 'application/json'
+  return json.dumps(db.get_all_nominations_categories())
 
 ################################################################################
 #     MOVIE SECTION
@@ -578,4 +584,3 @@ def delete_movie_trans():
 app = bottle.app()
 app.install(EnableCors())
 app.run(port=8080)
-#run(host='localhost', port=8080, debug=True, reloader=True)

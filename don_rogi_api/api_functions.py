@@ -151,15 +151,16 @@ class CronosDB():
     query = "SELECT * FROM director"
     results = self.select(query)
     for result in results:
-      result["birth_date"] = '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(result["birth_date"])
+      result["birth_date"] = result["birth_date"].strftime("%Y-%m-%d")
     return results
 
   def get_director_by_id(self, director_id):
     query = "SELECT * FROM director WHERE id='{0}'".format(director_id)
     results = self.select(query)
+    if not results:
+      raise ValueError("Cannot get director by id: {0}".format(director_id))
     for result in results:
-      print result
-      result["birth_date"] = '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(result["birth_date"])
+      result["birth_date"] = result["birth_date"].strftime("%Y-%m-%d")
     return results
 
   def get_director_id(self,name, nationality, birth_date):
@@ -395,6 +396,9 @@ class CronosDB():
     query = query.format(category_id, actor_id, year, won, nom_id)
     return self.update(query)
 
+  def get_all_nominations_categories(self):
+    query = "SELECT nc.id, nc.name, a.name AS award FROM nomination_category AS nc LEFT JOIN award AS a ON nc.award_id = a.id"
+    return self.select(query)
 
   ##############################################################################
   #           STUDIOS
