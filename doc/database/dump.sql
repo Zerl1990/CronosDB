@@ -36,7 +36,7 @@ CREATE TABLE `actor` (
   `nationality` varchar(64) NOT NULL,
   `birth_date` date NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,7 +45,7 @@ CREATE TABLE `actor` (
 
 LOCK TABLES `actor` WRITE;
 /*!40000 ALTER TABLE `actor` DISABLE KEYS */;
-INSERT INTO `actor` VALUES (1,'Nicole Kidman','Honolulu, Hawai, US','1967-07-20'),(2,'Leonardo DiCaprio','Hollywood, California, US','1974-11-11'),(3,'Tom Hardy','Longon, England','1977-08-15'),(4,'Domhall Gleeson','Dublin,Ireland','1983-05-12'),(5,'Will Poulter','London, England','1993-01-28');
+INSERT INTO `actor` VALUES (1,'Nicole Kidman','Honolulu, Hawai, US','1967-07-20'),(2,'Leonardo DiCaprio','Hollywood, California, US','1974-11-11'),(3,'Tom Hardy','Longon, England','1977-08-15'),(4,'Domhall Gleeson','Dublin,Ireland','1983-05-12'),(5,'Will Poulter','London, England','1993-01-28'),(6,'Jennifer Lawrence','Louisville, Kentucky, US','1990-08-15');
 /*!40000 ALTER TABLE `actor` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -61,7 +61,7 @@ CREATE TABLE `award` (
   `name` varchar(64) NOT NULL,
   `country` varchar(64) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -70,7 +70,7 @@ CREATE TABLE `award` (
 
 LOCK TABLES `award` WRITE;
 /*!40000 ALTER TABLE `award` DISABLE KEYS */;
-INSERT INTO `award` VALUES (1,'The Oscars','United  States'),(2,'Cannes Film Festival','France');
+INSERT INTO `award` VALUES (1,'The Oscars','United  States'),(2,'Cannes Film Festival','France'),(3,'UK Film Festival','United Kingdom');
 /*!40000 ALTER TABLE `award` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -97,6 +97,7 @@ CREATE TABLE `cast` (
 
 LOCK TABLES `cast` WRITE;
 /*!40000 ALTER TABLE `cast` DISABLE KEYS */;
+INSERT INTO `cast` VALUES (1,2),(1,3);
 /*!40000 ALTER TABLE `cast` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -123,6 +124,7 @@ CREATE TABLE `directed` (
 
 LOCK TABLES `directed` WRITE;
 /*!40000 ALTER TABLE `directed` DISABLE KEYS */;
+INSERT INTO `directed` VALUES (1,8);
 /*!40000 ALTER TABLE `directed` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -139,7 +141,7 @@ CREATE TABLE `director` (
   `nationality` varchar(64) NOT NULL,
   `birth_date` date NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -148,7 +150,7 @@ CREATE TABLE `director` (
 
 LOCK TABLES `director` WRITE;
 /*!40000 ALTER TABLE `director` DISABLE KEYS */;
-INSERT INTO `director` VALUES (8,'Alejandro Gonzalez Inarritu','Cuidad de Mexico, Mexico','1963-08-15');
+INSERT INTO `director` VALUES (8,'Alejandro Gonzalez Inarritu','Mexico City, Mexico','1963-08-15'),(9,'Clinton Eastwood Jr.','San Francisco, California, US','1930-05-31');
 /*!40000 ALTER TABLE `director` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -164,7 +166,7 @@ CREATE TABLE `film_studio` (
   `name` varchar(64) NOT NULL,
   `country` varchar(64) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -173,7 +175,7 @@ CREATE TABLE `film_studio` (
 
 LOCK TABLES `film_studio` WRITE;
 /*!40000 ALTER TABLE `film_studio` DISABLE KEYS */;
-INSERT INTO `film_studio` VALUES (1,'Warner Bros','United Kingdom'),(2,'Marvel Studios','United States'),(3,'20th Century Fox','United States');
+INSERT INTO `film_studio` VALUES (1,'Warner Bros','United Kingdom'),(2,'Marvel Studios','United States'),(3,'20th Century Fox','United States'),(4,'Walt Disney Pictures','United States');
 /*!40000 ALTER TABLE `film_studio` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -200,6 +202,7 @@ CREATE TABLE `filmed_by` (
 
 LOCK TABLES `filmed_by` WRITE;
 /*!40000 ALTER TABLE `filmed_by` DISABLE KEYS */;
+INSERT INTO `filmed_by` VALUES (1,3);
 /*!40000 ALTER TABLE `filmed_by` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -215,7 +218,7 @@ CREATE TABLE `genre` (
   `genre` varchar(64) NOT NULL,
   `sub_genre` varchar(64) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -224,7 +227,7 @@ CREATE TABLE `genre` (
 
 LOCK TABLES `genre` WRITE;
 /*!40000 ALTER TABLE `genre` DISABLE KEYS */;
-INSERT INTO `genre` VALUES (1,'Comedy','Romance'),(2,'Comedy','Super Natural'),(3,'Adventure','Drama'),(4,'Adventure','Thriller');
+INSERT INTO `genre` VALUES (1,'Comedy','Romance'),(2,'Comedy','Super Natural'),(3,'Adventure','Drama'),(4,'Adventure','Thriller'),(5,'Comedy','Western');
 /*!40000 ALTER TABLE `genre` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -243,7 +246,7 @@ CREATE TABLE `movie` (
   `country` varchar(64) NOT NULL,
   `url` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -252,6 +255,7 @@ CREATE TABLE `movie` (
 
 LOCK TABLES `movie` WRITE;
 /*!40000 ALTER TABLE `movie` DISABLE KEYS */;
+INSERT INTO `movie` VALUES (1,'The Revenant','2016-01-21','A frontiersman on a fur trading expedition in the 1820s fights for survival after being mauled by a bear and left for dead by members of his own hunting team. ','United States','https://www.youtube.com/watch?v=LoebZZ8K5N0');
 /*!40000 ALTER TABLE `movie` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -278,6 +282,7 @@ CREATE TABLE `movie_genre` (
 
 LOCK TABLES `movie_genre` WRITE;
 /*!40000 ALTER TABLE `movie_genre` DISABLE KEYS */;
+INSERT INTO `movie_genre` VALUES (1,3);
 /*!40000 ALTER TABLE `movie_genre` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -299,7 +304,7 @@ CREATE TABLE `nomination` (
   KEY `nom_actor_id` (`actor_id`),
   CONSTRAINT `nom_actor_id` FOREIGN KEY (`actor_id`) REFERENCES `actor` (`id`) ON DELETE CASCADE,
   CONSTRAINT `nom_nc_id` FOREIGN KEY (`nc_id`) REFERENCES `nomination_category` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -308,7 +313,7 @@ CREATE TABLE `nomination` (
 
 LOCK TABLES `nomination` WRITE;
 /*!40000 ALTER TABLE `nomination` DISABLE KEYS */;
-INSERT INTO `nomination` VALUES (7,4,2,'2016-01-04',1);
+INSERT INTO `nomination` VALUES (7,4,2,'2016-01-09',1),(8,4,3,'1990-01-09',1);
 /*!40000 ALTER TABLE `nomination` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -326,7 +331,7 @@ CREATE TABLE `nomination_category` (
   PRIMARY KEY (`id`),
   KEY `nomination_category` (`award_id`),
   CONSTRAINT `nomination_category` FOREIGN KEY (`award_id`) REFERENCES `award` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -335,7 +340,7 @@ CREATE TABLE `nomination_category` (
 
 LOCK TABLES `nomination_category` WRITE;
 /*!40000 ALTER TABLE `nomination_category` DISABLE KEYS */;
-INSERT INTO `nomination_category` VALUES (1,1,'Best Picture'),(2,1,'Best Director'),(3,1,'Best Film Editing'),(4,1,'Best Actor in a Leading Role ');
+INSERT INTO `nomination_category` VALUES (1,1,'Best Picture'),(2,1,'Best Director'),(3,1,'Best Film Editing'),(4,1,'Best Actor in a Leading Roles'),(5,1,'Update Later');
 /*!40000 ALTER TABLE `nomination_category` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -404,7 +409,7 @@ CREATE TABLE `user` (
   `email` varchar(64) NOT NULL,
   `admin` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -413,7 +418,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'LuisRivas','LuisRivas','luis.rivas.0606@gmail.com',0),(2,'TestUser','qwerty12','qwerty12',0),(3,'LuisRivas2','2','1',0);
+INSERT INTO `user` VALUES (1,'LuisRivas','LuisRivas','luis.rivas.0606@gmail.com',1),(2,'TestUser','qwerty12','qwerty12',1),(3,'LuisRivas2','LuisRivas2','1',0),(4,'TestUser','TestUser','TestUser',0),(5,'LuisRivas3','LuisRivas3','hohoho',1),(6,'LuisRivas4','LuisRivas4','eee',1),(7,'LuisRivas5','LuisRivas5','eee',0),(8,'LuisRivas6','LuisRivas6','luis.rivas.0606@gmail.com',0),(9,'Rosa Irene','Apepe34','dory_1719@hotmail.com',0);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -451,4 +456,4 @@ USE `cronos`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-03-29 20:38:49
+-- Dump completed on 2016-04-04 22:49:02

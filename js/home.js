@@ -8,6 +8,8 @@ $(document).ready(function(){
   $('#awards').click(createAwardView);
   $('#nomination-categories').click(createNCView);
   $('#nominations').click(createNominationView);
+  $('#movies').click(createMovieView);
+  $('#movies-transactions').click(createTransView);
 });
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1203,7 +1205,7 @@ function update_nom() {
 }
 
 var nominations = `
-  <h1 style="text-align: center; text-decoration: underline"><b>Nominations</b></h1>
+  <h1 style="text-align: center; text-decoration: underline"><b>Manage Nominations</b></h1>
   <div style="margin-top: 100px">
     <div style="float: left; width: 50%; height: 100%;">
       <div class="input-group">
@@ -1240,6 +1242,359 @@ var nominations = `
        <div class="input-group" style="margin-bottom: 20px">
         <label>Select An Award:</label>
         <select id="awards-dropdown">
+        </select>
+       </div>
+       <table id="edit-table" style="width: 100%" class="table table-hover">
+        <thead>
+        </thead>
+        <tbody>
+        </tbody>
+       </table>
+    </div>
+  </div>
+`;
+
+////////////////////////////////////////////////////////////////////////////////
+//  MOVIE MANAGE VIEW
+////////////////////////////////////////////////////////////////////////////////
+
+function createMovieView() {
+  $('#home-body').html(movies);
+
+  $('#edit-table > thead').append("<tr><th># Movie ID</th><th>Name</th><th>Year</th><th>Synopsis</th><th>Country</th><th>URL</th></tr>");
+
+  $.ajax({
+    url: "http://localhost:8080/movies",
+    type: "GET",
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    success: function(response) {
+      console.log("I got the current Movies" );
+      $('#edit-table > tbody').empty();
+      var length = response.length;
+      for( i = 0; i < length; i++) {
+        $('#edit-table > tbody').append("<tr><td>" + response[i].id + "</td><td>" + response[i].name + "</td><td>" + response[i].year + "</td><td>" + response[i].synopsis + "</td><td>" + response[i].country + "</td><td>" + response[i].url + "</td><td><button class='edit-button btn btn-warning btn-sm'>Edit</button></td><tr>");
+      }
+      $('.edit-button').click(function() {
+        resultArray = [];
+        $(this).closest("td").siblings().each(function () {
+          resultArray.push($(this).text());
+        });
+        $('#movie-id').val(resultArray[0]);
+        $('#movie-name').val(resultArray[1]);
+        $('#movie-year').val(resultArray[2]);
+        $('#movie-synopsis').val(resultArray[3]);
+        $('#movie-country').val(resultArray[4]);
+        $('#movie-url').val(resultArray[5]);
+      });
+      $('#post-button').click(post_movie);
+      $('#put-button').click(update_movie);
+    },
+    error: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log(jsonResponse.msg)
+      showError(jsonResponse.msg)
+    }
+  });
+}
+
+function post_movie() {
+  var movieid = $('#movie-id').val();
+  var movieName = $('#movie-name').val();
+  var movieYear = $('#movie-year').val();
+  var movieSynopsis = $('#movie-synopsis').val();
+  var movieCountry = $('#movie-country').val();
+  var movieURL = $('#movie-url').val();
+
+  var movie = {
+    name: movieName,
+    year: movieYear,
+    synopsis: movieSynopsis,
+    country: movieCountry,
+    url: movieURL
+  }
+
+  $.ajax({
+    url: "http://localhost:8080/movies",
+    type: "POST",
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify(movie),
+    success: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log("====Movie Created!!!====");
+      alert("Movie Created!");
+      createMovieView();
+    },
+    error: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log(jsonResponse.msg)
+      alert(jsonResponse.msg)
+    }
+  });
+}
+
+function update_movie() {
+  var movieid = $('#movie-id').val();
+  var movieName = $('#movie-name').val();
+  var movieYear = $('#movie-year').val();
+  var movieSynopsis = $('#movie-synopsis').val();
+  var movieCountry = $('#movie-country').val();
+  var movieURL = $('#movie-url').val();
+
+  var movie = {
+    id: movieid,
+    name: movieName,
+    year: movieYear,
+    synopsis: movieSynopsis,
+    country: movieCountry,
+    url: movieURL
+  }
+
+  $.ajax({
+    url: "http://localhost:8080/movies/" + movieid,
+    type: "PUT",
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify(movie),
+    success: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log("====Movie Updated!!!====");
+      alert("Movie Updated!");
+      createMovieView();
+    },
+    error: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log(jsonResponse.msg)
+      alert(jsonResponse.msg)
+    }
+  });
+}
+
+var movies = `
+  <h1 style="text-align: center; text-decoration: underline"><b>Manage Movies</b></h1>
+  <div style="margin-top: 100px">
+    <div style="float: left; width: 50%; height: 100%;">
+      <div class="input-group">
+        <label>Movie ID:</label>
+        <input type="text" class="form-control" value="" placeholder="Movie ID" id="movie-id"/>
+      </div>
+      <div class="input-group" style="margin-top: 20px">
+        <label>Movie Name:</label>
+        <input type="text" class="form-control" value="" placeholder="Movie Name" id="movie-name"/>
+      </div>
+      <div class="input-group" style="margin-top: 20px">
+        <label>Movie Year:</label>
+        <input type="text" class="form-control" value="" placeholder="Movie Year" id="movie-year"/>
+      </div>
+      <div class="input-group" style="margin-top: 20px">
+        <label>Movie Synopsis:</label>
+        <input type="text" class="form-control" value="" placeholder="Movie Synopsis" id="movie-synopsis"/>
+      </div>
+      <div class="input-group" style="margin-top: 20px">
+        <label>Movie Country:</label>
+        <input type="text" class="form-control" value="" placeholder="Movie Country" id="movie-country"/>
+      </div>
+      <div class="input-group" style="margin-top: 20px; margin-bottom: 20px">
+        <label>Movie URL:</label>
+        <input type="text" class="form-control" value="" placeholder="Movie URL" id="movie-url"/>
+      </div>
+      <button id="post-button" class="btn btn-success" style="margin-right: 30px">POST/Create</button>
+      <button id="put-button" class="btn btn-info">Update</button>
+    </div>
+    <div style="float: right; width: 50%" class="table-responsive">
+       <table id="edit-table" style="width: 100%" class="table table-hover">
+        <thead>
+        </thead>
+        <tbody>
+        </tbody>
+       </table>
+    </div>
+  </div>
+`;
+
+////////////////////////////////////////////////////////////////////////////////
+//  MOVIE TRANSACTIONS
+////////////////////////////////////////////////////////////////////////////////
+function createTransView() {
+  $('#home-body').html(transactions);
+  $('#trans-dropdown').change(createSubTransView);
+  $('#trans-dropdown').change();
+  fillMovieDropdown();
+}
+
+function createSubTransView() {
+  var transactionName = this.value;
+
+  $('#edit-table > thead').empty();
+  $('#edit-table > thead').append("<tr><th># Movide ID</th><th> Movie Name</th><th>" + transactionName + "-ID</th><<th>" + transactionName + "-Name</th>/tr>");
+
+  fillOtherDropdown(transactionName);
+
+  $.ajax({
+    url: "http://localhost:8080/movies/transaction/" + transactionName,
+    type: "GET",
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    success: function(response) {
+      console.log("I got the transaction: " + transactionName);
+      $('#edit-table > tbody').empty();
+      var length = response.length;
+      for( i = 0; i < length; i++) {
+        $('#edit-table > tbody').append("<tr><td>" + response[i].movie_id + "</td><td>" + response[i].movie_name + "</td><td>" + response[i].other_id + "</td><td>" + response[i].other_name+ "</td><td><button class='edit-button btn btn-warning btn-sm'>Select</button></td><tr>");
+      }
+      $('.edit-button').click(function() {
+        resultArray = [];
+        $(this).closest("td").siblings().each(function () {
+          resultArray.push($(this).text());
+        });
+        $('#trans-movie-id').val(resultArray[0]);
+        $('#trans-other-id').val(resultArray[2]);
+      });
+      $('#post-button').click(post_trans);
+      $('#del-button').click(del_trans);
+    },
+    error: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log(jsonResponse.msg)
+      showError(jsonResponse.msg)
+    }
+  });
+}
+
+function fillOtherDropdown(transaction) {
+  var transHash = {"cast": "actors", "directed": "directors", "movie_genre": "genres", "filmed_by": "studios"}
+  $('#trans-other-id').empty();
+
+  $.ajax({
+    url: "http://localhost:8080/" + transHash[transaction],
+    type: "GET",
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    success: function(response) {
+      console.log("I got the catalog: " + transHash[transaction]);
+      var length = response.length;
+      for (var j = 0; j < length; j++) {
+        if (transHash[transaction] == "genres") {
+          $('#trans-other-id').append("<option value='" + response[j].id + "'>" + response[j].genre + "-" + response[j].sub_genre + "</option>");
+        } else {
+          $('#trans-other-id').append("<option value='" + response[j].id + "'>" + response[j].name + "</option>");
+        }
+      }
+    },
+    error: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log(jsonResponse.msg)
+      showError(jsonResponse.msg)
+    }
+  });
+}
+
+function fillMovieDropdown() {
+  $('#trans-movie-id').empty();
+  $.ajax({
+    url: "http://localhost:8080/movies",
+    type: "GET",
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    success: function(response) {
+      console.log("I got the actors!");
+      var length = response.length;
+      for (var j = 0; j < length; j++) {
+        $('#trans-movie-id').append("<option value='" + response[j].id + "'>" + response[j].name + "</option>");
+      }
+    },
+    error: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log(jsonResponse.msg)
+      showError(jsonResponse.msg)
+    }
+  });
+}
+
+function post_trans() {
+  var movieid = $('#trans-movie-id').val();
+  var otherid = $('#trans-other-id').val();
+  var transName = $('#trans-dropdown').val();
+
+  var transaction = {
+    movie_id: movieid,
+    other_id: otherid,
+    trans_name: transName
+  }
+
+  $.ajax({
+    url: "http://localhost:8080/movies/transaction",
+    type: "POST",
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify(transaction),
+    success: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log("====Transaction Created!!!====");
+      $('#trans-dropdown').change();
+    },
+    error: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log(jsonResponse.msg)
+      alert(jsonResponse.msg)
+    }
+  });
+}
+
+function del_trans() {
+  var movieid = $('#trans-movie-id').val();
+  var otherid = $('#trans-other-id').val();
+  var transName = $('#trans-dropdown').val();
+
+  var transaction = {
+    movie_id: movieid,
+    other_id: otherid,
+    trans_name: transName
+  }
+
+  $.ajax({
+    url: "http://localhost:8080/movies/transaction/delete",
+    type: "POST",
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    data: JSON.stringify(transaction),
+    success: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log("====Transaction DELETED!!!====");
+      $('#trans-dropdown').change();
+    },
+    error: function(response) {
+      var jsonResponse = response.responseJSON;
+      console.log(jsonResponse.msg)
+      alert(jsonResponse.msg)
+    }
+  });
+}
+
+var transactions = `
+  <h1 style="text-align: center; text-decoration: underline"><b>Manage Movie Transactions:</b></h1>
+  <div style="margin-top: 100px">
+    <div style="float: left; width: 50%; height: 100%;">
+      <div class="input-group">
+        <label>Transaction Movie ID:</label>
+        <select id="trans-movie-id"></select>
+      </div>
+      <div class="input-group" style="margin-top: 20px; margin-bottom: 20px">
+        <label>Other Transaction ID:</label>
+        <select id="trans-other-id"></select>
+      </div>
+      <button id="post-button" class="btn btn-success" style="margin-right: 30px">POST/Create</button>
+      <button id="del-button" class="btn btn-info">Delete</button>
+    </div>
+    <div style="float: right; width: 50%" class="table-responsive">
+      <div class="input-group" style="margin-bottom: 20px">
+        <label>Select A Movie Transaction:</label>
+        <select id="trans-dropdown">
+          <option val='cast'>cast</option>
+          <option val='directed'>directed</option>
+          <option val='filmed_by'>filmed_by</option>
+          <option val='movie_genre'>movie_genre</option>
         </select>
        </div>
        <table id="edit-table" style="width: 100%" class="table table-hover">

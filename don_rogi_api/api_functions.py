@@ -407,23 +407,20 @@ class CronosDB():
     query = "SELECT * FROM movie"
     results = self.select(query)
     for result in results:
-      result["year"] = '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(result["year"])
+      result["year"] = result["year"].strftime("%Y-%m-%d")
     return results
 
   def get_movie_by_id(self, movie_id):
     query = "SELECT * FROM movie WHERE id='{0}'".format(movie_id)
-    movie = self.select(query)
-    if not movie or len(movie) < 1:
+    movies = self.select(query)
+    if not movies or len(movies) < 1:
       return None
-    movie["year"] = '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(movie["year"])
-    studio = self.get_movie_studio_info(movie_id)
-    genre = self.get_movie_genre_info(movie_id)
-    actor = self.get_movie_actor_info(movie_id)
-    director = self.get_movie_director_info(movie_id)
-    return {"movie": movie, "studio": studio, "genre": genre, "actor": actor, "director": director}
+    for movie in movies:
+      movie["year"] = movie["year"].strftime("%Y-%m-%d")
+    return movie;
 
   def get_movies_by_genre(self, genre):
-    query = "SELECT * FROM genre WHERE genre='{0}'"
+    query = "SELECT * FROM genre WHERE genre='{0}'".format(genre)
     query = query.format(genre)
     result = self.select(query)
     if not result or len(result) < 1:
@@ -473,14 +470,7 @@ class CronosDB():
     else:
       return result[0]['id']
 
-  def add_movie(self, info):
-    movie = info["movie"]
-    studio = info["studio"]
-    genre = info["genre"]
-    actor = info["actor"]
-    director = info["director"]
-
-    # Add movie logic
+  def add_movie(self, movie):
     movie_id = self.get_movie_id(movie["name"], movie["year"], movie["country"])
     if movie_id:
       print "Cannot movie, {0}-{1}-{2} already exists".format(movie["name"], movie["year"], movie["country"])
@@ -490,39 +480,31 @@ class CronosDB():
     query = query.format(movie["name"], movie["year"], movie["synopsis"], movie["country"], movie["url"])
     self.insert(query)
     movie_id = self.get_movie_id(movie["name"], movie["year"], movie["country"])
-
-    # Add extra fields logic
-    for item in studio:
-      studio_id = self.add_studio(item["name"], item["country"])
-      self.insert("INSERT INTO filmed_by (movie_id, studio_id) VALUES ('{0}', '{1}')".format(movie_id, studio_id))
-
-    for item in genre:
-      genre_id = self.add_genre(item["genre"], item["subgenre"])
-      self.insert("INSERT INTO movie_genre (movie_id, genre_id) VALUES ('{0}', '{1}')".format(movie_id, genre_id))
-
-    for item in actor:
-      actor_id = self.add_actor(item["name"], item["nationality"], item["birth_date"])
-      self.insert("INSERT INTO cast (movie_id, actor_id) VALUES ('{0}', '{1}')".format(movie_id, actor_id))
-
-    for item in director:
-      director_id = self.add_director(item["name"], item["nationality"], item["birth_date"])
-      self.insert("INSERT INTO directed (movie_id, director_id) VALUES ('{0}', '{1}')".format(movie_id, director_id))
     return movie_id
 
-  def update_movie(self, info):
-    movie = info["movie"]
-    query = "UPDATE  movie SET name='{0}', year='{1}', synopsis='{2}', country='{3}', url='{4}' WHERE id='{5}'"
+  def update_movie(self, movie):
+    query = "UPDATE movie SET name='{0}', year='{1}', synopsis='{2}', country='{3}', url='{4}' WHERE id='{5}'"
     query = query.format(movie["name"], movie["year"], movie["synopsis"], movie["country"], movie["url"], movie["id"])
     self.update(query)
     return self.get_movie_by_id(movie["id"])
 
-  def delete_movie_trans(self, table, other_attr,  movie_id, other_id):
-    query = "DELETE FROM '{0}' WHERE movie_id='{1}' AND '{2}'='{3}'"
-    query = query.format(table, other_attr, movie_id, other_id)
+  def delete_movie_trans(self, movie_id, other_id, transaction):
+    ids = {"cast": "actor_id", "directed": "director_id", "filmed_by": "studio_id", "movie_genre": "genre_id"}
+    query = "DELETE FROM {0} WHERE movie_id={1} AND {2}={3}"
+    query = query.format(transaction, movie_id, ids[transaction], other_id)
     return self.delete(query)
 
-  def add_movie_trans(self, table, other_attr,  movie_id, other_id):
-    query = "INSERT INTO '{0}' VALUES(movie_id, '{1}') VALUES ('{2}','{3}')"
-    query = query.format(table, other_attr, movie_id, other_id)
+  def add_movie_trans(self, movie_id, other_id, transaction):
+    query = "INSERT INTO {0} VALUES ({1},{2})"
+    query = query.format(transaction, movie_id, other_id)
     return self.insert(query)
+
+  def get_movie_trans(self, table):
+    attributes = {"cast": "name", "directed": "name", "filmed_by": "name", "movie_genre": "genre"}
+    catalogs = {"cast": "actor", "directed": "director", "filmed_by": "film_studio", "movie_genre": "genre"}
+    ids = {"cast": "actor_id", "directed": "director_id", "filmed_by": "studio_id", "movie_genre": "genre_id"}
+    query = "SELECT m.id AS movie_id , m.name AS movie_name, other.id AS other_id, other.{0} As other_name FROM {1} AS t LEFT JOIN movie AS m ON m.id = t.movie_id LEFT JOIN {2} AS other ON t.{3} = other.id"
+    query = query.format(attributes[table], table, catalogs[table], ids[table])
+    return self.select(query)
+
 

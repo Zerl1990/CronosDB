@@ -486,25 +486,25 @@ def show_awards():
 ################################################################################
 #     MOVIE SECTION
 ################################################################################
-@get('/movies')
+@route('/movies', method=['OPTIONS', 'GET'])
 def show_movies():
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_movies())
 
-@get('/movies/<movie_id>')
+@route('/movies/<movie_id>', method=['OPTIONS', 'GET'])
 def show_movie_by_id(movie_id):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_movie_by_id(movie_id))
 
-@get('/movies/genre/<genre_name>')
-def show_movie_by_id(genre_name):
+@route('/movies/genre/<genre_name>', method=['OPTIONS', 'GET'])
+def show_movie_by_genre(genre_name):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_movies_by_genre(genre_name))
 
-@post('/movies')
+@route('/movies', method=['OPTIONS', 'POST'])
 def add_movie():
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -516,14 +516,14 @@ def add_movie():
     if data is None:
       raise ValueError("Request is None")
     movie_id = db.add_movie(data)
-    return json.dumps({'movie_id': studio_id})
+    return json.dumps({'movie_id': movie_id})
   except ValueError as error:
     msg =  "Exception...{0}".format(error)
     response.status = 400
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@put('/movies/<movie_id>')
+@route('/movies/<movie_id>', method=['OPTIONS', 'PUT'])
 def update_movie(movie_id):
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -543,7 +543,7 @@ def update_movie(movie_id):
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@delete('/movies/transaction')
+@route('/movies/transaction/delete', method=['OPTIONS', 'POST'])
 def delete_movie_trans():
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
@@ -554,7 +554,7 @@ def delete_movie_trans():
       raise ValueError("Cannot parse request: {0}".format(error))
     if data is None:
       raise ValueError("Request is None")
-    result = db.delete_movie_trans(data["table"], data["other_attr"], data["movie_id"], data["other_id"])
+    result = db.delete_movie_trans(data["movie_id"], data["other_id"], data["trans_name"])
     return json.dumps({'result': result})
   except ValueError as error:
     msg =  "Exception...{0}".format(error)
@@ -562,8 +562,8 @@ def delete_movie_trans():
     print msg
     return json.dumps({"status": 400, "msg": msg})
 
-@post('/movies/transaction')
-def delete_movie_trans():
+@route('/movies/transaction', method=['OPTIONS', 'POST'])
+def add_movie_trans():
   response.headers['Content-Type'] = 'application/json'
   db = CronosDB("root", "zerl", "cronos")
   try:
@@ -573,13 +573,19 @@ def delete_movie_trans():
       raise ValueError("Cannot parse request: {0}".format(error))
     if data is None:
       raise ValueError("Request is None")
-    result = db.add_movie_trans(data["table"], data["other_attr"], data["movie_id"], data["other_id"])
+    result = db.add_movie_trans(data["movie_id"], data["other_id"], data["trans_name"])
     return json.dumps({'result': result})
   except ValueError as error:
     msg =  "Exception...{0}".format(error)
     response.status = 400
     print msg
     return json.dumps({"status": 400, "msg": msg})
+
+@route('/movies/transaction/<name>', method=['OPTIONS', 'GET'])
+def show_movie_trans(name):
+  db = CronosDB("root", "zerl", "cronos")
+  response.headers['Content-Type'] = 'application/json'
+  return json.dumps(db.get_movie_trans(name))
 
 app = bottle.app()
 app.install(EnableCors())
