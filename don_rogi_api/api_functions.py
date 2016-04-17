@@ -1,5 +1,7 @@
 #!/usr/bin/python
 import MySQLdb as mdb
+import difflib
+import operator
 
 class CronosDB():
   def __init__(self, user=None, password=None, database=None):
@@ -380,20 +382,20 @@ class CronosDB():
     else:
       return result[0]['id']
 
-  def add_award_nomination(self, category_id, actor_id, year, won):
+  def add_award_nomination(self, category_id, actor_id, year, won, movie_id):
     nom_id = self.get_award_nomination_id(category_id, actor_id, year, won)
     if nom_id:
       print "Cannot add nomination, {0}-{1}-{2}-{3} already exists".format(category_id, actor_id, year, won)
       return nom_id
-    query = "INSERT INTO nomination (id, nc_id, actor_id, year, won) VALUES (DEFAULT, '{0}', '{1}', '{2}', '{3}')"
-    query = query.format(category_id, actor_id, year, won)
+    query = "INSERT INTO nomination (id, nc_id, actor_id, year, won, movie_id) VALUES (DEFAULT, '{0}', '{1}', '{2}', '{3}', '{4}')"
+    query = query.format(category_id, actor_id, year, won, movie_id)
     self.insert(query)
     nom_id = self.get_award_nomination_id(category_id, actor_id, year, won)
     return nom_id
 
-  def update_award_nomination(self, nom_id, category_id, actor_id, year, won):
-    query = "UPDATE nomination SET nc_id='{0}', actor_id='{1}', year='{2}', won='{3}' WHERE id='{4}'"
-    query = query.format(category_id, actor_id, year, won, nom_id)
+  def update_award_nomination(self, nom_id, category_id, actor_id, year, won, movie_id):
+    query = "UPDATE nomination SET nc_id='{0}', actor_id='{1}', year='{2}', won='{3}', movie_id='{4}' WHERE id='{5}'"
+    query = query.format(category_id, actor_id, year, won, movie_id, nom_id)
     return self.update(query)
 
   def get_all_nominations_categories(self):
@@ -401,7 +403,7 @@ class CronosDB():
     return self.select(query)
 
   ##############################################################################
-  #           STUDIOS
+  #           MOVIES
   ##############################################################################
   def get_movies(self):
     query = "SELECT * FROM movie"
@@ -417,49 +419,81 @@ class CronosDB():
       return None
     for movie in movies:
       movie["year"] = movie["year"].strftime("%Y-%m-%d")
-    return movie;
-
-  def get_movies_by_genre(self, genre):
-    query = "SELECT * FROM genre WHERE genre='{0}'".format(genre)
-    query = query.format(genre)
-    result = self.select(query)
-    if not result or len(result) < 1:
+    return movies[0];
+    
+  def get_movie_view_info(self, movie_id):
+    info = {}
+    info["genre"] = self.get_movie_genre_info(movie_id)
+    info["studio"] = self.get_movie_studio_info(movie_id)
+    info["actor"] = self.get_movie_actor_info(movie_id)
+    info["director"] = self.get_movie_director_info(movie_id)
+    info["movie"] = self.get_movie_by_id(movie_id)
+    info["nominations"] = self.get_movie_nom_info(movie_id)
+    info["movie"]["youtube_id"] = info["movie"]["url"].split("=")[-1]
+    return info
+    
+  def get_movie_nom_info(self, movie_id):
+    query = "SELECT actor_name, award_name, category_name, year FROM nomination_view WHERE movie_id='{0}'"
+    query = query.format(movie_id)
+    nominations = self.select(query)
+    if not nominations:
       return None
-    genre_id = result[0]['id']
+    for nom in nominations:
+      nom["year"] = nom["year"].strftime("%Y-%m-%d")
+    return nominations
+  
+  def get_movies_by_genre(self, genre):
+    query = "SELECT m.id AS id, m.name AS name, m.url AS url FROM movie AS m LEFT OUTER JOIN movie_genre AS mg ON m.id = mg.movie_id JOIN (SELECT * FROM genre WHERE genre='{0}') AS g ON mg.genre_id = g.id"
+    query = query.format(genre)
+    return self.select(query)
+    
+  def get_movies_by_director(self, director_name):
+    query = "SELECT m.id AS id, m.name AS name, m.url AS url FROM movie AS m LEFT OUTER JOIN directed AS d ON m.id = d.movie_id JOIN (SELECT * FROM director WHERE name='{0}') AS dir ON d.director_id = dir.id "
+    query = query.format(director_name)
+    return self.select(query)
+    
+  def get_movies_by_actor(self, actor_name):
+    query = "SELECT m.id AS id, m.name AS name, m.url AS url FROM movie AS m LEFT OUTER JOIN cast AS c ON m.id = c.movie_id JOIN (SELECT * FROM actor WHERE name='{0}') AS a ON c.actor_id = a.id"
+    query = query.format(actor_name)
+    return self.select(query)
+    
+  def get_movies_by_year(self, year):
+    query = "SELECT id, name, url FROM movie WHERE YEAR(year)='{0}'"
+    query = query.format(year)
+    return self.select(query)
 
-    query = "SELECT m.id, m.name, m.url FROM movie AS m LEFT OUTER JOIN(SELECT * FROM movie_genre WHERE genre_id='{0}') AS g ON m.id = g.movie_id"
-    query = query.format(genre_id)
-    results = self.select(query)
-    return result
-
+  def get_movies_by_genre_subgenre(self, genre, subgenre):
+    query = "SELECT m.id AS id, m.name AS name, m.url AS url FROM movie AS m LEFT OUTER JOIN movie_genre AS mg ON m.id = mg.movie_id JOIN (SELECT * FROM genre WHERE genre='{0}' AND sub_genre='{1}') AS g ON mg.genre_id = g.id "
+    query = query.format(genre, subgenre)
+    return self.select(query)
+    
   def get_movie_genre_info(self, movie_id):
-    query = "SELECT g.id, g.genre, g.subgenre FROM movie_genre AS mg LEFT OUTER JOIN (SELECT * movie WHERE id='{0}') AS m ON mg.movie_id = m.id LEFT OUTER JOIN genre AS g ON mv.genre_id = g.id"
+    query = "SELECT g.id, g.genre, g.sub_genre FROM movie_genre AS mg LEFT OUTER JOIN genre AS g ON mg.genre_id = g.id JOIN (SELECT * from movie WHERE id='{0}') AS m ON mg.movie_id = m.id "
     query = query.format(movie_id)
     results = self.select(query)
-    return result
+    return results
 
   def get_movie_studio_info(self, movie_id):
-    query = "SELECT fs.id, fs.name, fs.country FROM filmed_by AS fb LEFT OUTER JOIN (SELECT * movie WHERE id='{0}') AS m ON fb.movie_id = m.id LEFT OUTER JOIN film_studio AS fs ON fb.studio_id = fs.id"
+    query = "SELECT fs.id, fs.name, fs.country FROM filmed_by AS fb LEFT OUTER JOIN film_studio AS fs ON fb.studio_id = fs.id JOIN (SELECT * from movie WHERE id='{0}') AS m ON fb.movie_id = m.id"
     query = query.format(movie_id)
     results = self.select(query)
-    return result
-
+    return results
 
   def get_movie_actor_info(self, movie_id):
-    query = "SELECT a.id, a.name, a.nationality, a.birth_date FROM cast AS c LEFT OUTER JOIN (SELECT * movie WHERE id='{0}') AS m ON c.movie_id = m.id LEFT OUTER JOIN actor AS a ON c.actor_id = a.id"
+    query = "SELECT a.id, a.name, a.nationality, a.birth_date FROM cast AS c LEFT OUTER JOIN actor AS a ON c.actor_id = a.id JOIN (SELECT * from movie WHERE id='{0}') AS m ON c.movie_id = m.id"
     query = query.format(movie_id)
     results = self.select(query)
     for result in results:
-      result["birth_date"] = '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(result["year"])
-    return result
+      result["birth_date"] = result["birth_date"].strftime("%Y-%m-%d")
+    return results
 
   def get_movie_director_info(self, movie_id):
-    query = "SELECT d.id, d.name, d.nationality, d.birth_date FROM directed AS dir LEFT OUTER JOIN (SELECT * movie WHERE id='{0}') AS m ON dir.movie_id = m.id LEFT OUTER JOIN director AS d ON dd.director_id = d.id"
+    query = "SELECT d.id, d.name, d.nationality, d.birth_date FROM directed AS dir LEFT OUTER JOIN director AS d ON dir.director_id = d.id JOIN (SELECT * from movie WHERE id='{0}') AS m ON dir.movie_id = m.id"
     query = query.format(movie_id)
     results = self.select(query)
     for result in results:
-      result["birth_date"] = '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(result["year"])
-    return result
+      result["birth_date"] = result["birth_date"].strftime("%Y-%m-%d")
+    return results
 
   def get_movie_id(self, name, year, country):
     query = "SELECT id FROM movie WHERE name='{0}' AND country='{1}' AND year='{2}'"
@@ -506,5 +540,91 @@ class CronosDB():
     query = "SELECT m.id AS movie_id , m.name AS movie_name, other.id AS other_id, other.{0} As other_name FROM {1} AS t LEFT JOIN movie AS m ON m.id = t.movie_id LEFT JOIN {2} AS other ON t.{3} = other.id"
     query = query.format(attributes[table], table, catalogs[table], ids[table])
     return self.select(query)
-
-
+    
+  ##############################################################################
+  #           SMART
+  ##############################################################################
+  def get_rating_info(self, user_id, movie_id):
+    query = "SELECT * FROM rating WHERE user_id='{0}' AND movie_id='{1}'"
+    query = query.format(user_id, movie_id)
+    return self.select(query)
+    
+  def update_displays(self, user_id, movie_id):
+    current_displays = self.get_rating_info(user_id, movie_id)
+    if current_displays != None and len(current_displays) > 0:
+      query = "UPDATE rating SET play_count='{0}' WHERE user_id='{1}' AND movie_id='{2}'"
+      query = query.format(current_displays[0]["play_count"] + 1, user_id, movie_id,)
+      self.update(query)
+    else:
+      query = "INSERT INTO rating (user_id, movie_id, play_count, rate) VALUES ('{0}', '{1}', '1', '0')"
+      query = query.format(user_id, movie_id)
+      self.insert(query)
+    return self.get_rating_info(user_id, movie_id)
+   
+  def update_rating(self, user_id, movie_id, rate):
+    current_rate = self.get_rating_info(user_id, movie_id)
+    if current_rate != None and len(current_rate) > 0:
+      query = "UPDATE rating SET rate='{0}' WHERE user_id='{1}' AND movie_id='{2}'"
+      query = query.format(rate, user_id, movie_id,)
+      self.update(query)
+    else:
+      query = "INSERT INTO rating (user_id, movie_id, play_count, rate) VALUES ('{0}', '{1}', '0', '{2}')"
+      query = query.format(user_id, movie_id, rate)
+      self.insert(query)
+    return self.get_rating_info(user_id, movie_id)
+    
+  def get_top_movies(self):
+    query = "SELECT movie_id, SUM(play_count) AS displays FROM rating GROUP BY movie_id ORDER BY displays DESC LIMIT 5"
+    ids = self.select(query)
+    ids = [ id["movie_id"] for id in ids]
+    movies = []
+    for id in ids:  
+      query = "SELECT id, name, url FROM movie WHERE id='{0}'"
+      query = query.format(id)
+      movies.append(self.select(query)[0])
+    return movies
+    
+  def get_rating_by_user(self, user_id, movie_id):
+    query = "SELECT rate FROM rating WHERE user_id='{0}' AND movie_id='{1}'"
+    query = query.format(user_id, movie_id)
+    return self.select(query)
+    
+  def get_rating_by_movie(self, movie_id):
+    query = "SELECT AVG(rate) AS rate FROM rating WHERE movie_id='{0}' GROUP BY movie_id"
+    query = query.format(movie_id)
+    results = self.select(query)
+    for result in results:
+      result["rate"] = int(result["rate"])
+    return results
+    
+  def get_likes_hash(self, user_id):
+    query = "SELECT user_id, movie_id, rate FROM rating";
+    results = self.select(query)
+    likes = {}
+    for result in results:
+      if not result["user_id"] in likes:
+        likes[result["user_id"]] = []
+        for i in xrange(0, result["rate"]):
+          likes[result["user_id"]].append(result["movie_id"])
+      else:
+        likes[result["user_id"]].append(result["movie_id"])
+    
+    likes_result = {}
+    for key in likes:
+      likes_result[key] = difflib.SequenceMatcher(None, likes[int(user_id)], likes[key]).ratio()
+      
+    likes_result = sorted(likes_result.items(), key=operator.itemgetter(1))
+    return self.get_top_movies_by_user(likes_result[-2][0])
+    
+    
+  def get_top_movies_by_user(self, user_id):
+    query = "SELECT movie_id, SUM(play_count) AS displays FROM rating WHERE user_id='{0}' GROUP BY movie_id ORDER BY displays DESC LIMIT 5".format(user_id)
+    print query
+    ids = self.select(query)
+    ids = [ id["movie_id"] for id in ids]
+    movies = []
+    for id in ids:  
+      query = "SELECT id, name, url FROM movie WHERE id='{0}'"
+      query = query.format(id)
+      movies.append(self.select(query)[0])
+    return movies

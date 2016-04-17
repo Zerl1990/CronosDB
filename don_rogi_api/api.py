@@ -449,7 +449,7 @@ def add_award_category(award_id):
       raise ValueError("Cannot parse request: {0}".format(error))
     if data is None:
       raise ValueError("Request is None")
-    nom_id = db.add_award_nomination(data['category_id'], data['actor_id'], data['year'], data['won'])
+    nom_id = db.add_award_nomination(data['category_id'], data['actor_id'], data['year'], data['won'], data["movie"])
     return json.dumps({'nom_id': nom_id})
   except ValueError as error:
     msg =  "Exception...{0}".format(error)
@@ -468,7 +468,7 @@ def update_award_category(award_id, nom_id):
       raise ValueError("Cannot parse request: {0}".format(error))
     if data is None:
       raise ValueError("Request is None")
-    if not db.update_award_nomination(nom_id, data["category_id"], data["actor_id"], data["year"], data["won"]):
+    if not db.update_award_nomination(nom_id, data["category_id"], data["actor_id"], data["year"], data["won"], data["movie"]):
       raise ValueError("Cannot award nomination {0}-{1}-{2}-{3}-{4}".format(nom_id, data["category_id"], data["actor_id"], data["year"], data["won"]))
     return json.dumps(db.get_award_nomination_by_id(nom_id))
   except ValueError as error:
@@ -497,12 +497,59 @@ def show_movie_by_id(movie_id):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_movie_by_id(movie_id))
+  
+@route('/movies/view/<movie_id>', method=['OPTIONS', 'GET'])
+def show_movie_view_by_id(movie_id):
+  db = CronosDB("root", "zerl", "cronos")
+  response.headers['Content-Type'] = 'application/json'
+  return json.dumps(db.get_movie_view_info(movie_id))
 
 @route('/movies/genre/<genre_name>', method=['OPTIONS', 'GET'])
 def show_movie_by_genre(genre_name):
   db = CronosDB("root", "zerl", "cronos")
   response.headers['Content-Type'] = 'application/json'
-  return json.dumps(db.get_movies_by_genre(genre_name))
+  movies = db.get_movies_by_genre(genre_name);
+  for movie in movies:
+    movie["youtube_id"] = movie["url"].split("=")[-1]
+  return json.dumps(movies)
+  
+@route('/movies/director/<director_name>', method=['OPTIONS', 'GET'])
+def show_movie_by_director(director_name):
+  db = CronosDB("root", "zerl", "cronos")
+  response.headers['Content-Type'] = 'application/json'
+  director_name = director_name.replace(":", " ")
+  movies = db.get_movies_by_director(director_name);
+  for movie in movies:
+    movie["youtube_id"] = movie["url"].split("=")[-1]
+  return json.dumps(movies)
+
+@route('/movies/actor/<actor_name>', method=['OPTIONS', 'GET'])
+def show_movie_by_actor(actor_name):
+  db = CronosDB("root", "zerl", "cronos")
+  response.headers['Content-Type'] = 'application/json'
+  actor_name = actor_name.replace(":", " ")
+  movies = db.get_movies_by_actor(actor_name);
+  for movie in movies:
+    movie["youtube_id"] = movie["url"].split("=")[-1]
+  return json.dumps(movies)
+  
+@route('/movies/year/<year>', method=['OPTIONS', 'GET'])
+def show_movie_by_year(year):
+  db = CronosDB("root", "zerl", "cronos")
+  response.headers['Content-Type'] = 'application/json'
+  movies = db.get_movies_by_year(year);
+  for movie in movies:
+    movie["youtube_id"] = movie["url"].split("=")[-1]
+  return json.dumps(movies)
+  
+@route('/movies/genre/<genre_name>/<subgenre_name>', method=['OPTIONS', 'GET'])
+def show_movie_by_subgenre(genre_name, subgenre_name):
+  db = CronosDB("root", "zerl", "cronos")
+  response.headers['Content-Type'] = 'application/json'
+  movies = db.get_movies_by_genre_subgenre(genre_name, subgenre_name);
+  for movie in movies:
+    movie["youtube_id"] = movie["url"].split("=")[-1]
+  return json.dumps(movies)
 
 @route('/movies', method=['OPTIONS', 'POST'])
 def add_movie():
@@ -587,6 +634,77 @@ def show_movie_trans(name):
   response.headers['Content-Type'] = 'application/json'
   return json.dumps(db.get_movie_trans(name))
 
+################################################################################
+#     SMART SECTION
+################################################################################
+@route('/smart/displays/<user_id>/<movie_id>', method=['OPTIONS', 'POST'])
+def update_displays(user_id, movie_id):
+  response.headers['Content-Type'] = 'application/json'
+  db = CronosDB("root", "zerl", "cronos")
+  try:
+    info = db.update_displays(user_id, movie_id)
+    return json.dumps(info)
+  except ValueError as error:
+    msg =  "Exception...{0}".format(error)
+    response.status = 400
+    print msg
+    return json.dumps({"status": 400, "msg": msg})
+
+@route('/smart/rating/<user_id>/<movie_id>/<rating>', method=['OPTIONS', 'POST'])
+def update_rating(user_id, movie_id, rating):
+  response.headers['Content-Type'] = 'application/json'
+  db = CronosDB("root", "zerl", "cronos")
+  try:
+    info = db.update_rating(user_id, movie_id, rating)
+    return json.dumps(info)
+  except ValueError as error:
+    msg =  "Exception...{0}".format(error)
+    response.status = 400
+    print msg
+    return json.dumps({"status": 400, "msg": msg})
+    
+@route('/smart/rating/<user_id>/<movie_id>', method=['OPTIONS', 'GET'])
+def get_rating_by_user(user_id, movie_id):
+  response.headers['Content-Type'] = 'application/json'
+  db = CronosDB("root", "zerl", "cronos")
+  try:
+    return json.dumps(db.get_rating_by_user(user_id, movie_id))
+  except ValueError as error:
+    msg =  "Exception...{0}".format(error)
+    response.status = 400
+    print msg
+    return json.dumps({"status": 400, "msg": msg})
+    
+@route('/smart/movies/rating/<movie_id>', method=['OPTIONS', 'GET'])
+def get_rating_by_movie(movie_id):
+  response.headers['Content-Type'] = 'application/json'
+  db = CronosDB("root", "zerl", "cronos")
+  try:
+    return json.dumps(db.get_rating_by_movie(movie_id))
+  except ValueError as error:
+    msg =  "Exception...{0}".format(error)
+    response.status = 400
+    print msg
+    return json.dumps({"status": 400, "msg": msg})
+  
+@route('/smart/movies/top', method=['OPTIONS', 'GET'])
+def get_top_movies():
+  db = CronosDB("root", "zerl", "cronos")
+  response.headers['Content-Type'] = 'application/json'
+  movies = db.get_top_movies()
+  for movie in movies:
+    movie["youtube_id"] = movie["url"].split("=")[-1]
+  return json.dumps(movies)
+  
+@route('/smart/movies/suggestion/<user_id>', method=['OPTIONS', 'GET'])
+def get_suggestion(user_id):
+  db = CronosDB("root", "zerl", "cronos")
+  response.headers['Content-Type'] = 'application/json'
+  movies = db.get_likes_hash(user_id)
+  for movie in movies:
+    movie["youtube_id"] = movie["url"].split("=")[-1]
+  return json.dumps(movies)
+ 
 app = bottle.app()
 app.install(EnableCors())
 app.run(port=8080)

@@ -30,6 +30,7 @@ function login() {
       console.log("Email:" + response.email);
       console.log("Admin:" + response.admin);
       console.log("============================");
+      createCookie("CronosUserID", response.id);
       createCookie("CronosName", response.name);
       createCookie("CronosEmail", response.email);
       createCookie("CronosAdmin", response.admin);
@@ -93,6 +94,7 @@ function create() {
       console.log("Email:" + response.email);
       console.log("Admin:" + response.admin);
       console.log("============================");
+      createCookie("CronosUserID", response.id);
       createCookie("CronosName", response.name);
       createCookie("CronosEmail", response.email);
       createCookie("CronosAdmin", response.admin);
